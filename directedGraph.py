@@ -1,7 +1,7 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 from pyvis.network import Network
-from plotGraph import plotGraph
+# from plotGraph import plotGraph
 
 '''
 BitcoinAlpha has 3783 nodes, 24186 edges
@@ -33,6 +33,7 @@ def createAdjacencyMatrix(G):
     return adj
 
 G = snapDataset()
+print(createAdjacencyMatrix(G).shape)
 # print(sorted(G.in_degree, key=lambda x: x[1], reverse=True))
 # print(sorted(G.out_degree, key=lambda x: x[1], reverse=True))
 # print(G.get_edge_data(2,7500))
