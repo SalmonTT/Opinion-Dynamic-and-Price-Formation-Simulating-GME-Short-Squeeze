@@ -13,28 +13,31 @@ def testLognormalDistribution():
     plt.axis('tight')
     plt.show()
 
-def initialize(mu, sigma):
-    G = np.random.normal(mu, sigma, 100)
-    print(G)
-    print(G.mean())
-    print("Start")
-    return G
-
-def boundedConfidence(G):
+def boundedConfidence(X, epsi):
+    """
+    :param X: the opinion vector X(t)
+    :param epsi: threshold
+    :return: the adaptive update matrix C(t)
+    """
+    # C is the adaptive update matrix
     C = np.zeros((100, 100))
+    # iterate through every agent
     for i in range(100):
-        count = 0
+        # count is the number of agents that are similar to agent i
+        # since {i} is included in I(i, x(t-1), p(t-1)), count is at least 1
+        count = 1
+        # for every agent, compare his/her opinion with others
         for j in range(100):
-            if abs(G[i]-G[j]) <= 5 :
-                count = count+1
-                C[i][j] = 100
+            if abs(X[i]-X[j]) <= epsi:
+                count += 1
+                C[i][j] = 100 # what does this mean?
         tmp = np.full(100, 1/count)
         C[i] = np.where(C[i] == 100, tmp, C[i])
     return C
 
 def simulate(G, A, alpha, P, n):
     for i in range(n):
-        C = boundedConfidence(G)
+        C = boundedConfidence(G, 5)
         # print(C)
         A = alpha*C + (1-alpha)*A
         print(A)
@@ -44,16 +47,21 @@ def simulate(G, A, alpha, P, n):
         P = np.append(P, G.mean()-a*var*z_s)
     return P
 
-mu, sigma = 30, 15
-r = 0.5 # interest rate
-a = 1 # constant absolute risk aversion coefficient
-var = 0.5 # variance of stock in risk premium
-z_s = 10 # supply per agent
-G = initialize(mu, sigma)
-A = boundedConfidence(G)
-# print(A)
+mu, sigma = 30, 15 # mean and standard deviation for normal distribution
+r = 0.5 # risk-free interest rate
+a = 1 # constant absolute risk aversion coefficient (CARA)
+var = 0.5 # variance of stock in risk premium (assumed constant, may need to read Hommes & Wagener)
+z_s = 10 # supply per agent (Why not use equation 3 for this?)
+
+# Draw random samples from normal distribution
+# here X is X(t=0)
+X = np.random.normal(mu, sigma, 100)
+A = boundedConfidence(X, 5)
+
 alpha = np.full(100, .5)
-G = np.matmul(G, A)
-P = np.full(1, G.mean()-a*var*z_s)
-P = simulate(G, A, alpha, P, 10)
+# Update the opinion matrix to get X(t=1)
+X = np.matmul(X, A)
+
+P = np.full(1, X.mean()-a*var*z_s)
+P = simulate(X, A, alpha, P, 10)
 print(P)
