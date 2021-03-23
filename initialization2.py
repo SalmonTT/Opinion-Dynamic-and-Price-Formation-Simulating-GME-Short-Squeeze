@@ -53,7 +53,7 @@ def simulate(X, A, alpha, P, n):
         # print(np.all(A))
         # print(np.all(C))
         X = np.matmul(A,X)
-        # print("-------------------------------------------")
+        print("-------------------------------------------")
         # print(X)
         P = np.append(P, X.mean()-a*var*z_s)
         # print("This is round ", i, "X is: ")
@@ -80,6 +80,16 @@ alpha = np.full(100, .25)
 X1 = np.matmul(A0, X0)
 # initialize P(t=0)
 P0 = np.full(1, X1.mean()-a*var*z_s)
+# initialize Z(t=0) Question: do we discretize this?
+Z0 = (1/(a*var))*(X1-(1-r)*P0)
+z_s = Z0.mean()
+print(z_s)
+"""
+after initialization we now have the following:
+A(t=0)
+X(t=0), X(t=1)
+P(t=0) 
+"""
 
 """ Simulation """
 P = simulate(X1, A0, alpha, P0, 10)
