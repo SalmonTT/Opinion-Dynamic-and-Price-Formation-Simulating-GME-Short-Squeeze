@@ -13,7 +13,7 @@ def testLognormalDistribution():
     plt.axis('tight')
     plt.show()
 
-def boundedConfidence(X, epsi):
+def PriceAdaptive(X, epsi):
     """
     :param X: the opinion vector X(t)
     :param epsi: threshold
@@ -45,7 +45,7 @@ def simulate(X, A, alpha, P, n):
     :return: return P(t=n)
     '''
     for i in range(n):
-        C = boundedConfidence(X, 0.01)
+        C = PriceAdaptive(X, 0.01)
         # print("before A: ")
         # print(A)
         A = alpha*C + (1-alpha)*A
@@ -53,7 +53,7 @@ def simulate(X, A, alpha, P, n):
         # print(np.all(A))
         # print(np.all(C))
         X = np.matmul(A,X)
-        print("-------------------------------------------")
+        # print("-------------------------------------------")
         # print(X)
         P = np.append(P, X.mean()-a*var*z_s)
         # print("This is round ", i, "X is: ")
@@ -62,16 +62,14 @@ def simulate(X, A, alpha, P, n):
 
 
 """ Initialization """
-mu, sigma = 30, 15 # mean and standard deviation for normal distribution
-r = 0.5 # risk-free interest rate
+r = 0.02 # risk-free interest rate
 a = 1 # constant absolute risk aversion coefficient (CARA)
 var = 0.5 # variance of stock in risk premium (assumed constant, may need to read Hommes & Wagener)
-z_s = 10 # supply per agent (Question: how to initialize in the beginning?)
+
 
 # Draw random samples from normal distribution
-# here X is X(t=0)
 X0 = np.random.uniform(0, 1, 100)
-A0 = boundedConfidence(X0, 0.01)
+A0 = PriceAdaptive(X0, 0.01)
 # print("initialized A: ")
 # print(np.all(A0))
 # alpha is an ndarray filled with 0.5
@@ -79,9 +77,11 @@ alpha = np.full(100, .25)
 # Update the opinion matrix to get X(t=1)
 X1 = np.matmul(A0, X0)
 # initialize P(t=0)
-P0 = np.full(1, X1.mean()-a*var*z_s)
+P0 = 0.5
+# P0 = np.full(1, X1.mean()-a*var*z_s)
 # initialize Z(t=0) Question: do we discretize this?
-Z0 = (1/(a*var))*(X1-(1-r)*P0)
+Z0 = (1/(a*var))*(X1-(1+r)*P0)
+print(Z0)
 z_s = Z0.mean()
 print(z_s)
 """
