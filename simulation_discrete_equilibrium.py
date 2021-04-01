@@ -62,8 +62,8 @@ def DoSimulation():
         P = PricingEq(X, r, a, var, z_s, n)
         price_list.append(P)
         # --- obtain C(t) ---
-        # C = BoundedConfidence(X, n, eps_BC)
-        C = PriceAdaptive(X_prev, P, n, eps_PA)
+        C = BoundedConfidence(X, n, eps_BC)
+        # C = PriceAdaptive(X_prev, P, n, eps_PA)
         # --- obtain A(t) ---
         A = alpha*C + (1-alpha)*A
         # --- update X(round) -> X(round+1) ---
@@ -71,12 +71,12 @@ def DoSimulation():
 
         print("Round ", round)
         # print("P: ", P)
-        # print("C: ")
-        # print(C)
+        print("C: ")
+        print(C)
         # print("A: ")
         # print(A)
-        print("X: ")
-        print(X)
+        # print("X: ")
+        # print(X)
     print(price_list)
 
 DoSimulation()
