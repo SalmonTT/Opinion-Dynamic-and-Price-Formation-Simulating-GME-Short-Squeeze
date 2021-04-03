@@ -7,7 +7,8 @@ def getCurrentZ(a, var, r, p, X):
     given the current price (p(t)) and current opinion (x(t), note x(t) is expected price for
     period t+1), we we obtain z(t) which is the optimal # of shares held for current period t.
     '''
-    Z = (1/(a*var)) * (X - (1+r)*p) # equation 2
+    # note that Z must be a discrete number
+    Z = int((1/(a*var)) * (X - (1+r)*p)) # equation 2
     return Z
 
 def getAction(Z_now, Z_prev, actions, n):
@@ -39,6 +40,24 @@ def getOrderPrice(action, beta, p, X, orderPrice, n):
             return orderPrice
     return orderPrice
 
+def updatePrice(actions, orderPrices, p, Zt, Z_prev, Z_now):
+    '''
+    Order matching:
+        - ignore the traditional order matching mechanism and fulfill everyone's orders given Zt constraint
+    Zt constraint:
+        - if sum of 'orders' is zero (meaning no change in total number of shares held by all agents), execute
+        all orders.
+        - randomly select an agent's order and tries to execute it:
+            - Execute the very first order
+            - For all other orders：
+                - if
+    '''
+    orders = Z_now - Z_prev
+
+
+    return
+
+
 
 def DoSimulation():
 
@@ -51,6 +70,7 @@ def DoSimulation():
     beta = [] # An array, risk preference when it comes to placing orders
     actions = np.zeros(n) # current actions for each agent (discrete values of 1, -1 and 0 - Buy Sell Hold)
     orderPrice = np.zeros(n) # prices of current order for each agent
+    Z = [] # need to find a way to initialize Z
 
 
     var = 0.1  # variance of stock in risk premium
