@@ -1,5 +1,9 @@
 import numpy as np
 
+"""
+This is the simulation described in paper with the equilibrium assumption
+"""
+
 def PricingEq(X, r, a, var, z_s, n):
     # eq.4 of the paper, however uses x(t) instead of x(t+1)
     discounted_ave_opinion = X.mean() * (1/(1+r))
