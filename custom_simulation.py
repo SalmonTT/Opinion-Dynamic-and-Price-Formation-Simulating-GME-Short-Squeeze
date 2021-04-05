@@ -59,6 +59,40 @@ def updatePrice(actions, orderPrices, p, r, Z):
 
     return (ave_asks+ave_bids)/2
 
+def updateXwithBC(X, n, eps):
+    '''
+       Get C the update matrix to update X using BC
+    '''
+    # C is the update matrix
+    C = np.zeros((n, n))
+    for i in range(n):
+        # count is the number of agents that are similar to agent i
+        count = 0
+        # for every agent, compare his/her opinion with others
+        for j in range(n):
+            if abs(X[i] - X[j]) <= eps[i]:
+                count += 1
+                C[i][j] = 1  # mark C[i][j] with 1 to show that they are similar
+        C[i] = np.where(C[i] == 1, 1 / count, C[i])  # formula after eq.6
+
+    return C
+
+def updateXwithPA(X, P, n, eps):
+    '''
+       Get C the update matrix to update X using PA
+    '''
+    # C is the update matrix
+    C = np.zeros((n, n))
+    for i in range(n):
+        # count is the number of agents whose opinions are closest to the actual price at time t
+        count = 0
+        for j in range(n):
+            if abs((P - X[j])/P) <= eps[i]:
+                count += 1
+                C[i][j] = 1  # mark C[i][j] with 1 to show that they are similar
+        C[i] = np.where(C[i] == 1, 1/count, C[i]) # formula after eq.6
+    return C
+
 def DoSimulation():
 
     # --- Initialization --- #
@@ -71,7 +105,6 @@ def DoSimulation():
     actions = np.zeros(n) # current actions for each agent (discrete values of 1, -1 and 0 - Buy Sell Hold)
     orderPrice = np.zeros(n) # prices of current order for each agent
     Z = [] # need to find a way to initialize Z
-
 
     var = 0.1  # variance of stock in risk premium
     alpha = np.random.uniform(0, 1, n)  # alpha [0,1] is the update propensity parameter.
