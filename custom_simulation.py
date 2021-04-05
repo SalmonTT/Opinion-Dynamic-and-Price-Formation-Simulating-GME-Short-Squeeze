@@ -25,39 +25,39 @@ def getAction(Z_now, Z_prev, actions, n):
             actions[i] = 0 # Hold
     return actions
 
-def getOrderPrice(action, beta, p, X, orderPrice, n):
+def getOrderPrice(action, beta, p, X, orderPrice, n, r):
     '''
     return the prices of orders for each agent at current period t
     '''
     for i in range(n):
         if(action[i] == 1): # buy order
-            # returns a float with two decimal places that is greater than or equal to p(t)-beta and less than x(t)
-            orderPrice[i] = decimal.Decimal(random.randrange((p - beta[i]) * 100, X[i] * 100)) / 100
+            # returns a float with two decimal places that is greater than or equal to (1+r)*p(t)-beta and less than x(t)
+            orderPrice[i] = decimal.Decimal(random.randrange(((1+r)*p - beta[i]) * 100, X[i] * 100)) / 100
         elif(action[i] == -1): # sell order
-            # returns a float with two decimal places that is greater than or equal to x(t) and less than p(t)+beta
-            orderPrice[i] = decimal.Decimal(random.randrange(X[i] * 100, (p + beta[i]) * 100)) / 100
+            # returns a float with two decimal places that is greater than or equal to x(t) and less than (1+r)*p(t)+beta
+            orderPrice[i] = decimal.Decimal(random.randrange(X[i] * 100, ((1+r)*p + beta[i]) * 100)) / 100
         else: # hold
             return orderPrice
     return orderPrice
 
-def updatePrice(actions, orderPrices, p, Zt, Z_prev, Z_now):
+def updatePrice(actions, orderPrices, p, r, Z):
     '''
     Order matching:
-        - ignore the traditional order matching mechanism and fulfill everyone's orders given Zt constraint
-    Zt constraint:
-        - if sum of 'orders' is zero (meaning no change in total number of shares held by all agents), execute
-        all orders.
-        - randomly select an agent's order and tries to execute it:
-            - Execute the very first order
-            - For all other orders：
-                - if
+        - ignore the traditional order matching mechanism and fulfill everyone's orders
+        - After orders are executed, we update price p(t) using the Bid-Ask prices.
+    Returns the new price for next period
     '''
-    orders = Z_now - Z_prev
+    bids = [] # an array of all bidding prices
+    asks = [] # an array of al asking prices
+    for order in actions:
+        if(order == 1):
+            bids.append(orderPrices[actions.index(order)])
+        elif(order == -1):
+            asks.append(orderPrices[actions.index(order)])
+    ave_bids = bids.mean()
+    ave_asks = asks.mean()
 
-
-    return
-
-
+    return (ave_asks+ave_bids)/2
 
 def DoSimulation():
 
