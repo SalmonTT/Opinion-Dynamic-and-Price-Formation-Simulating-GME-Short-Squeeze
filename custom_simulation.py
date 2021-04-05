@@ -8,7 +8,8 @@ def getCurrentZ(a, var, r, p, X):
     period t+1), we we obtain z(t) which is the optimal # of shares held for current period t.
     '''
     # note that Z must be a discrete number
-    Z = int((1/(a*var)) * (X - (1+r)*p)) # equation 2
+    Z = (1/(a*var)) * (X - (1+r)*p) # equation 2
+    Z = Z.astype(int)
     return Z
 
 def getAction(Z_now, Z_prev, actions, n):
@@ -32,15 +33,15 @@ def getOrderPrice(action, beta, p, X, orderPrice, n, r):
     for i in range(n):
         if(action[i] == 1): # buy order
             # returns a float with two decimal places that is greater than or equal to (1+r)*p(t)-beta and less than x(t)
-            orderPrice[i] = decimal.Decimal(random.randrange(((1+r)*p - beta[i]) * 100, X[i] * 100)) / 100
+            orderPrice[i] = decimal.Decimal(random.randrange(int(((1+r)*p - beta[i]) * 100), int(X[i] * 100))) / 100
         elif(action[i] == -1): # sell order
             # returns a float with two decimal places that is greater than or equal to x(t) and less than (1+r)*p(t)+beta
-            orderPrice[i] = decimal.Decimal(random.randrange(X[i] * 100, ((1+r)*p + beta[i]) * 100)) / 100
+            orderPrice[i] = decimal.Decimal(random.randrange(int(X[i] * 100), int(((1+r)*p + beta[i]) * 100))) / 100
         else: # hold
             return orderPrice
     return orderPrice
 
-def updatePrice(actions, orderPrices, p, r, Z):
+def updatePrice(actions, orderPrices, n):
     '''
     Order matching:
         - ignore the traditional order matching mechanism and fulfill everyone's orders
@@ -49,14 +50,13 @@ def updatePrice(actions, orderPrices, p, r, Z):
     '''
     bids = [] # an array of all bidding prices
     asks = [] # an array of al asking prices
-    for order in actions:
-        if(order == 1):
-            bids.append(orderPrices[actions.index(order)])
-        elif(order == -1):
-            asks.append(orderPrices[actions.index(order)])
-    ave_bids = bids.mean()
-    ave_asks = asks.mean()
-
+    for i in range(n):
+        if(actions[i] == 1):
+            bids.append(orderPrices[i])
+        elif(actions[i] == -1):
+            asks.append(orderPrices[i])
+    ave_bids = sum(bids)
+    ave_asks = sum(asks)
     return (ave_asks+ave_bids)/2
 
 def updateXwithBC(X, n, eps):
@@ -101,10 +101,12 @@ def DoSimulation():
     r = 0.02  # risk-free interest rate
     a = 0.1  # constant absolute risk aversion coefficient (CARA)
 
-    beta = [] # An array, risk preference when it comes to placing orders
+    beta = np.random.uniform(0, 10, n) # An array, risk preference when it comes to placing orders
     actions = np.zeros(n) # current actions for each agent (discrete values of 1, -1 and 0 - Buy Sell Hold)
     orderPrice = np.zeros(n) # prices of current order for each agent
-    Z = [] # need to find a way to initialize Z
+    Z = np.random.randint(100,1000,n) # each agent holds between 10 to 1000 shares
+    p = 100 # initialize p(t=0) to be 100
+
 
     var = 0.1  # variance of stock in risk premium
     alpha = np.random.uniform(0, 1, n)  # alpha [0,1] is the update propensity parameter.
@@ -114,4 +116,29 @@ def DoSimulation():
     A = np.identity(n) # initialize A(t=0) as an identity matrix
     # A = np.ones(n)  # initialize A(t=0) as an matrix full of ones
 
-    
+    # --- Simulation --- #
+
+    for round in range(t):
+        # Portfolio holding dynamics
+        Z_prev = Z
+        Z = getCurrentZ(a, var, r, p, X)
+
+        # Price dynamics
+        actions = getAction(Z, Z_prev, actions, n)
+        orderPrice = getOrderPrice(actions, beta, p, X, orderPrice, n, r)
+        p = updatePrice(actions, orderPrice, n)
+
+        # Expected price dynamics
+        C = updateXwithBC(X, n, eps_BC)
+        # C = updateXwithPA(X_prev, P, n, eps_PA)
+        A = alpha*C + (1-alpha)*A
+        X = np.matmul(A, X)
+
+
+        # console.log
+        print("Round ", round)
+        print("Price: ", p)
+
+
+DoSimulation()
+
