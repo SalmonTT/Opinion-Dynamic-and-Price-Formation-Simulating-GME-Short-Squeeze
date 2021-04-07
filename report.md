@@ -1,6 +1,6 @@
 # Modling and Simulating Opinion Dynamics
 
-## Introductiojn
+## Introduction
 
 
 
