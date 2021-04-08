@@ -119,9 +119,13 @@ def DoSimulation():
         # print(A_PA)
         # print("X: ")
         # print(X_PA)
+    print('price list BC')
     print(price_list_BC)
+    print('price list PA')
     print(price_list_PA)
+    print('std BC')
     print(std_BC)
+    print('std PA')
     print(std_PA)
 
 DoSimulation()

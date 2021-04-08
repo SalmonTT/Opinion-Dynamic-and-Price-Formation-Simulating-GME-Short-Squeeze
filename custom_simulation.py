@@ -7,6 +7,9 @@ def getCurrentZ(a, var, r, p, X):
     given the current price (p(t)) and current opinion (x(t), note x(t) is expected price for
     period t+1), we we obtain z(t) which is the optimal # of shares held for current period t.
     '''
+    print("price is", p)
+    print("this is X")
+    print(X)
     # note that Z must be a discrete number
     Z = (1/(a*var)) * (X - (1+r)*p) # equation 2
     Z = Z.astype(int)
@@ -20,10 +23,13 @@ def getAction(Z_now, Z_prev, actions, n):
     for i in range(n):
         if(Z_now[i] > Z_prev[i]):
             actions[i] = 1 # Buy
-        if (Z_now[i] < Z_prev[i]):
+        elif (Z_now[i] < Z_prev[i]):
             actions[i] = -1  # Sell
         else:
             actions[i] = 0 # Hold
+        # print("prev: ", Z_prev[i])
+        # print("now: ", Z_now[i])
+        # print("action: ",actions[i])
     return actions
 
 def getOrderPrice(action, beta, p, X, orderPrice, n, r):
@@ -55,8 +61,9 @@ def updatePrice(actions, orderPrices, n):
             bids.append(orderPrices[i])
         elif(actions[i] == -1):
             asks.append(orderPrices[i])
-    ave_bids = sum(bids)
-    ave_asks = sum(asks)
+    ave_bids = sum(bids)/len(bids)
+
+    ave_asks = sum(asks)/len(asks)
     return (ave_asks+ave_bids)/2
 
 def updateXwithBC(X, n, eps):
@@ -96,49 +103,56 @@ def updateXwithPA(X, P, n, eps):
 def DoSimulation():
 
     # --- Initialization --- #
-    n = 100 # number of agents
-    t = 10 # number of rounds
-    r = 0.02  # risk-free interest rate
+    n = 10  # number of agents
+    t = 1 # number of rounds
+    r = 0.0007700  # risk-free interest rate
     a = 0.1  # constant absolute risk aversion coefficient (CARA)
-
-    beta = np.random.uniform(0, 10, n) # An array, risk preference when it comes to placing orders
-    actions = np.zeros(n) # current actions for each agent (discrete values of 1, -1 and 0 - Buy Sell Hold)
-    orderPrice = np.zeros(n) # prices of current order for each agent
-    Z = np.random.randint(100,1000,n) # each agent holds between 10 to 1000 shares
-    p = 100 # initialize p(t=0) to be 100
-
-
-    var = 0.1  # variance of stock in risk premium
+    beta = np.random.uniform(0, 10, n) # An array, risk preference when it comes to placing order
+    price = 394 # initialize p(t=0) to be price
+    var = 0.000173627  # variance of stock in risk premium
     alpha = np.random.uniform(0, 1, n)  # alpha [0,1] is the update propensity parameter.
-    eps_BC = np.random.uniform(0, 0.4, n) # epsilon for BC model
-    eps_PA = np.full(n, 0.1)
-    X = np.random.uniform(1, 10, n) # X is X(t=0) which is the expected price for t=1 (next period)
+    eps_BC = np.random.uniform(0, 0.1, n) # epsilon for BC model
+    X = np.random.normal(394.730011, 10, n)  # X is X(t=0) which is the expected price for t=1 (next period)
     A = np.identity(n) # initialize A(t=0) as an identity matrix
     # A = np.ones(n)  # initialize A(t=0) as an matrix full of ones
+
+
+    actions = np.zeros(n)  # current actions for each agent (discrete values of 1, -1 and 0 - Buy Sell Hold)
+    orderPrice = np.zeros(n)  # prices of current order for each agent
+    Z = np.random.randint(100, 1000, n)  # each agent holds between 10 to 1000 shares
+    print("initial Z:")
+    print(Z)
+    price_list_BC = []
+    std_BC = [X.std()]
+
 
     # --- Simulation --- #
 
     for round in range(t):
         # Portfolio holding dynamics
         Z_prev = Z
-        Z = getCurrentZ(a, var, r, p, X)
-
+        Z = getCurrentZ(a, var, r, price, X)
+        print("this is Z:")
+        print(Z)
         # Price dynamics
         actions = getAction(Z, Z_prev, actions, n)
-        orderPrice = getOrderPrice(actions, beta, p, X, orderPrice, n, r)
-        p = updatePrice(actions, orderPrice, n)
+        print("actions are:", actions)
 
+        orderPrice = getOrderPrice(actions, beta, price, X, orderPrice, n, r)
+        price = updatePrice(actions, orderPrice, n)
+        print("Order prices: ", orderPrice)
         # Expected price dynamics
         C = updateXwithBC(X, n, eps_BC)
         # C = updateXwithPA(X_prev, P, n, eps_PA)
         A = alpha*C + (1-alpha)*A
         X = np.matmul(A, X)
 
+        print("price: ", price)
+        price_list_BC.append(price)
+        std_BC.append(X.std())
 
-        # console.log
-        print("Round ", round)
-        print("Price: ", p)
 
-
+    # print(price_list_BC)
+    # print(std_BC)
 DoSimulation()
 
