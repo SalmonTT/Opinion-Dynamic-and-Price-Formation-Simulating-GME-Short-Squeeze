@@ -48,27 +48,27 @@ def PriceAdaptive(X, P, n, eps):
 def DoSimulation():
 
     # --- Initialization --- #
-    n = 10  # number of agents
-    t = 20  # number of rounds
+    n = 100  # number of agents
+    t = 50 # number of rounds
     r = 0.0007700  # risk-free interest rate
-    a = 0.1  # constant absolute risk aversion coefficient (CARA)
+    a = 1  # constant absolute risk aversion coefficient (CARA)
     var = 0.000173627  # variance of stock in risk premium
     z_s = 100  # supply per agent (assumed to be constant here under equilibrium condition)
     alpha = np.random.uniform(0, 1, n)  # alpha [0,1] is the update propensity parameter.
-    eps_BC = np.random.uniform(0, 0.1, n) # epsilon for BC model
-    eps_PA = np.random.uniform(0, 0.1, n)
-    X_BC = np.random.normal(394.730011, 100, n) # X is X(t=0) which is the expected price for t=1 (next period)
+    eps_BC = np.random.uniform(0, 0.005, n) # epsilon for BC model
+    # eps_PA = np.random.uniform(0, 0.05, n)
+    X_BC = np.random.normal(394.730011, 10, n) # X is X(t=0) which is the expected price for t=1 (next period)
     # X_BC = np.random.uniform(1, 10, n)
     X_PA = X_BC
-    print(X_PA)
+    # print(X_PA)
     A_BC = np.identity(n) # initialize A(t=0) as an identity matrix
-    A_PA = A_BC
+    # A_PA = A_BC
     # A = np.ones(n)  # initialize A(t=0) as an matrix full of ones
 
     price_list_BC = []
     std_BC = [X_BC.std()]
-    price_list_PA = []
-    std_PA = [X_PA.std()]
+    # price_list_PA = []
+    # std_PA = [X_PA.std()]
 
     # --- simulation --- #
     for round in range(t):
@@ -96,20 +96,20 @@ def DoSimulation():
         # print(X)
 
 
-    for round in range(t):
-
-        X_prev = X_PA
-        # --- obtain P(t), the equilibrium price on risky asset at time t ---
-        P = PricingEq(X_PA, r, a, var, z_s, n)
-        price_list_PA.append(P)
-        # --- obtain C(t) ---
-        # C = BoundedConfidence(X, n, eps_BC)
-        C = PriceAdaptive(X_prev, P, n, eps_PA)
-        # --- obtain A(t) ---
-        A_PA = alpha*C + (1-alpha)*A_PA
-        # --- update X(round) -> X(round+1) ---
-        X_PA = np.matmul(A_PA, X_PA)
-        std_PA.append(X_PA.std())
+    # for round in range(t):
+    #
+    #     X_prev = X_PA
+    #     # --- obtain P(t), the equilibrium price on risky asset at time t ---
+    #     P = PricingEq(X_PA, r, a, var, z_s, n)
+    #     price_list_PA.append(P)
+    #     # --- obtain C(t) ---
+    #     # C = BoundedConfidence(X, n, eps_BC)
+    #     C = PriceAdaptive(X_prev, P, n, eps_PA)
+    #     # --- obtain A(t) ---
+    #     A_PA = alpha*C + (1-alpha)*A_PA
+    #     # --- update X(round) -> X(round+1) ---
+    #     X_PA = np.matmul(A_PA, X_PA)
+    #     std_PA.append(X_PA.std())
 
         # print("Round ", round)
         # print("P: ", P)
@@ -119,16 +119,18 @@ def DoSimulation():
         # print(A_PA)
         # print("X: ")
         # print(X_PA)
-    print('price list BC')
+    # print('price list BC')
     print(price_list_BC)
-    print('price list PA')
-    print(price_list_PA)
-    print('std BC')
+    # print('price list PA')
+    # print(price_list_PA)
+    # print('std BC')
     print(std_BC)
-    print('std PA')
-    print(std_PA)
+    # print('std PA')
+    # print(std_PA)
+    print("next round")
 
-DoSimulation()
+for i in range(5):
+    DoSimulation()
 
 
 
