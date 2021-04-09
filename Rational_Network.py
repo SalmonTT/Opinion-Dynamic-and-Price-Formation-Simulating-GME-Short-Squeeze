@@ -10,7 +10,6 @@ def getDeltaZ(a, var, r, p, X):
     print("this is X")
     print(X)
     # note that Z must be a discrete number
-    print(1/(a*var))
     deltaZ = (1/(a*var)) * (X - (1+r)*p) # equation 2
     deltaZ = deltaZ.astype(int)
     # Constraint on deltaZ: potentially place a upper limit on deltaZ (wealth constraint)
@@ -90,7 +89,7 @@ def updateXwithBC(X, n, eps):
         count = 0
         # for every agent, compare his/her opinion with others
         for j in range(n):
-            if abs(X[i] - X[j]) <= eps[i]:
+            if abs(X[i] - X[j])/abs(X[i]) <= eps[i]:
                 count += 1
                 C[i][j] = 1  # mark C[i][j] with 1 to show that they are similar
         C[i] = np.where(C[i] == 1, 1 / count, C[i])  # formula after eq.6
@@ -116,16 +115,16 @@ def updateXwithPA(X, P, n, eps):
 def DoSimulation():
 
     # --- Initialization --- #
-    n = 10  # number of agents
-    t = 10 # number of rounds
+    n = 100  # number of agents
+    t = 50 # number of rounds
     r = 0.0007700  # risk-free interest rate
     a = 1  # constant absolute risk aversion coefficient (CARA)
     beta = np.random.uniform(0, 10, n) # An array, risk preference when it comes to placing order
-    price = 394 # initialize p(t=0) to be price
-    var = 3  # variance of stock in risk premium
+    price = 100 # initialize p(t=0) to be price
+    var = 1  # variance of stock in risk premium
     alpha = np.random.uniform(0, 1, n)  # alpha [0,1] is the update propensity parameter.
     eps_BC = np.random.uniform(0, 0.1, n) # epsilon for BC model
-    X = np.random.normal(394.730011, 10, n)  # X is X(t=0) which is the expected price for t=1 (next period)
+    X = np.random.normal(100, 10, n)  # X is X(t=0) which is the expected price for t=1 (next period)
     A = np.identity(n) # initialize A(t=0) as an identity matrix
     # A = np.ones(n)  # initialize A(t=0) as an matrix full of ones
 
@@ -160,13 +159,13 @@ def DoSimulation():
         price_list_BC.append(price)
         std_BC.append(X.std())
 
-        print("this is Z_delta:")
-        print(Z_delta)
-        print("actions are:")
-        print(actions)
-        print("this is Z_current after change:")
-        print(Z_current)
-        print("Order prices: ", orderPrice)
+        # print("this is Z_delta:")
+        # print(Z_delta)
+        # print("actions are:")
+        # print(actions)
+        # print("this is Z_current after change:")
+        # print(Z_current)
+        # print("Order prices: ", orderPrice)
         print("price for next period: ", price)
 
 
