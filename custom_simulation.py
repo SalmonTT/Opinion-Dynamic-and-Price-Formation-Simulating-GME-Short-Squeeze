@@ -33,12 +33,12 @@ def getAction(Z_delta, Z_current, actions, n):
             actions[i] = 1 # Buy
         elif (Z_delta[i] < 0):
             if (Z_current[i] > 0): # only if agent currently owns share
+                if(abs(Z_delta[i]) > Z_current[i]): # if agent owns less that Z_delta
+                    Z_delta[i] = -Z_current[i]
                 actions[i] = -1  # Sell
             else: actions[i] = 0  # agent does not own share, do nothing
         else:
             actions[i] = 0 # Hold
-        print("Z_delta: ", Z_delta[i])
-        print("action: ",actions[i])
     return actions
 
 def getOrderPrice(action, beta, p, X, orderPrice, n, r):
@@ -52,10 +52,8 @@ def getOrderPrice(action, beta, p, X, orderPrice, n, r):
         elif(action[i] == -1): # sell order
             # returns a float with two decimal places that is greater than or equal to x(t) and less than (1+r)*p(t)+beta
             # orderPrice[i] = decimal.Decimal(random.randrange(int(X[i] * 100), int(((1+r)*p + beta[i]) * 100))) / 100
-            orderPrice[i] = random.uniform(X[i], (1 + r) * p - beta[i])
-        else: # hold
+            orderPrice[i] = random.uniform(X[i], (1 + r) * p + beta[i])
 
-            return orderPrice
     return orderPrice
 
 def updatePrice(Z_delta, actions, orderPrices, n):
@@ -74,13 +72,10 @@ def updatePrice(Z_delta, actions, orderPrices, n):
         elif(actions[i] == -1):
             asks.append(orderPrices[i]*(abs(Z_delta[i]))/order_sum)
 
-    print(asks)
-    print(bids)
-    if(len(bids)!=0):
-        ave_bids = sum(bids)/len(bids)
-    else: ave_bids = 0
-    ave_asks = sum(asks)/len(asks)
-    return (ave_asks+ave_bids)/2
+    print("asking prices: ", asks)
+    print("bidding prices:", bids)
+    return sum(bids) + sum(asks)
+
 
 def updateXwithBC(X, n, eps):
     '''
@@ -120,12 +115,12 @@ def DoSimulation():
 
     # --- Initialization --- #
     n = 10  # number of agents
-    t = 2 # number of rounds
+    t = 10 # number of rounds
     r = 0.0007700  # risk-free interest rate
     a = 1  # constant absolute risk aversion coefficient (CARA)
     beta = np.random.uniform(0, 10, n) # An array, risk preference when it comes to placing order
     price = 394 # initialize p(t=0) to be price
-    var = 0.000173627  # variance of stock in risk premium
+    var = 3  # variance of stock in risk premium
     alpha = np.random.uniform(0, 1, n)  # alpha [0,1] is the update propensity parameter.
     eps_BC = np.random.uniform(0, 0.1, n) # epsilon for BC model
     X = np.random.normal(394.730011, 10, n)  # X is X(t=0) which is the expected price for t=1 (next period)
@@ -135,7 +130,7 @@ def DoSimulation():
 
     actions = np.zeros(n)  # current actions for each agent (discrete values of 1, -1 and 0 - Buy Sell Hold)
     orderPrice = np.zeros(n)  # prices of current order for each agent
-    Z_current = np.random.randint(100, 1000, n)  # each agent holds between 10 to 1000 shares
+    Z_current = np.random.randint(10, 100, n)  # each agent holds between 10 to 1000 shares
     print("initial Z_current:")
     print(Z_current)
     price_list_BC = []
@@ -145,20 +140,23 @@ def DoSimulation():
     # --- Simulation --- #
 
     for round in range(t):
+        print("---------------- ROUND ", round, " ----------------")
         # Portfolio holding dynamics
         Z_delta = getDeltaZ(a, var, r, price, X)
         print("this is Z_delta:")
         print(Z_delta)
+        actions = getAction(Z_delta, Z_current, actions, n)
+        print("actions are:")
+        print(actions)
         Z_current = updateCurrentZ(Z_current,Z_delta,n)
         print("this is Z_current after change:")
         print(Z_current)
         # Price dynamics
-        actions = getAction(Z_delta, Z_current, actions, n)
-        print("actions are:", actions)
+
 
         orderPrice = getOrderPrice(actions, beta, price, X, orderPrice, n, r)
-        price = updatePrice(Z_delta, actions, orderPrice, n)
         print("Order prices: ", orderPrice)
+        price = updatePrice(Z_delta, actions, orderPrice, n)
         # Expected price dynamics
         C = updateXwithBC(X, n, eps_BC)
         # C = updateXwithPA(X_prev, P, n, eps_PA)
