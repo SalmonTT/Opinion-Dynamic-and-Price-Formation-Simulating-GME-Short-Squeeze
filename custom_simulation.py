@@ -11,9 +11,11 @@ def getDeltaZ(a, var, r, p, X):
     print(X)
     # note that Z must be a discrete number
     print(1/(a*var))
-    Z = (1/(a*var)) * (X - (1+r)*p) # equation 2
-    Z = Z.astype(int)
-    return Z
+    deltaZ = (1/(a*var)) * (X - (1+r)*p) # equation 2
+    deltaZ = deltaZ.astype(int)
+    # Constraint on deltaZ: potentially place a upper limit on deltaZ (wealth constraint)
+
+    return deltaZ
 
 def updateCurrentZ(Z_current, Z_delta, n):
     for i in range(n):
@@ -72,8 +74,8 @@ def updatePrice(Z_delta, actions, orderPrices, n):
         elif(actions[i] == -1):
             asks.append(orderPrices[i]*(abs(Z_delta[i]))/order_sum)
 
-    print("asking prices: ", asks)
-    print("bidding prices:", bids)
+    # print("asking prices: ", asks)
+    # print("bidding prices:", bids)
     return sum(bids) + sum(asks)
 
 
@@ -143,19 +145,10 @@ def DoSimulation():
         print("---------------- ROUND ", round, " ----------------")
         # Portfolio holding dynamics
         Z_delta = getDeltaZ(a, var, r, price, X)
-        print("this is Z_delta:")
-        print(Z_delta)
         actions = getAction(Z_delta, Z_current, actions, n)
-        print("actions are:")
-        print(actions)
         Z_current = updateCurrentZ(Z_current,Z_delta,n)
-        print("this is Z_current after change:")
-        print(Z_current)
         # Price dynamics
-
-
         orderPrice = getOrderPrice(actions, beta, price, X, orderPrice, n, r)
-        print("Order prices: ", orderPrice)
         price = updatePrice(Z_delta, actions, orderPrice, n)
         # Expected price dynamics
         C = updateXwithBC(X, n, eps_BC)
@@ -163,12 +156,25 @@ def DoSimulation():
         A = alpha*C + (1-alpha)*A
         X = np.matmul(A, X)
 
-        print("price: ", price)
+
         price_list_BC.append(price)
         std_BC.append(X.std())
 
+        print("this is Z_delta:")
+        print(Z_delta)
+        print("actions are:")
+        print(actions)
+        print("this is Z_current after change:")
+        print(Z_current)
+        print("Order prices: ", orderPrice)
+        print("price for next period: ", price)
 
-    # print(price_list_BC)
-    # print(std_BC)
+
+
+
+
+
+    print(price_list_BC)
+    print(std_BC)
 DoSimulation()
 
