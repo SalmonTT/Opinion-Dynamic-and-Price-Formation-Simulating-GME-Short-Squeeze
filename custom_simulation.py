@@ -36,7 +36,7 @@ def getAction(Z_delta, Z_current, actions, n):
         elif (Z_delta[i] < 0):
             if (Z_current[i] > 0): # only if agent currently owns share
                 if(abs(Z_delta[i]) > Z_current[i]): # if agent owns less that Z_delta
-                    Z_delta[i] = -Z_current[i]
+                    Z_delta[i] = (-Z_current[i])
                 actions[i] = -1  # Sell
             else: actions[i] = 0  # agent does not own share, do nothing
         else:
@@ -90,7 +90,7 @@ def updateXwithBC(X, n, eps):
         count = 0
         # for every agent, compare his/her opinion with others
         for j in range(n):
-            if abs(X[i] - X[j]) <= eps[i]:
+            if abs((X[i] - X[j])/X[i]) <= eps[i]:
                 count += 1
                 C[i][j] = 1  # mark C[i][j] with 1 to show that they are similar
         C[i] = np.where(C[i] == 1, 1 / count, C[i])  # formula after eq.6
@@ -116,15 +116,15 @@ def updateXwithPA(X, P, n, eps):
 def DoSimulation():
 
     # --- Initialization --- #
-    n = 10  # number of agents
-    t = 10 # number of rounds
+    n = 100  # number of agents
+    t = 50 # number of rounds
     r = 0.0007700  # risk-free interest rate
     a = 1  # constant absolute risk aversion coefficient (CARA)
     beta = np.random.uniform(0, 10, n) # An array, risk preference when it comes to placing order
-    price = 394 # initialize p(t=0) to be price
-    var = 3  # variance of stock in risk premium
+    price = 394.730011 # initialize p(t=0) to be price
+    var = 15.57  # variance of stock in risk premium
     alpha = np.random.uniform(0, 1, n)  # alpha [0,1] is the update propensity parameter.
-    eps_BC = np.random.uniform(0, 0.1, n) # epsilon for BC model
+    eps_BC = np.random.uniform(0, 0.02, n) # epsilon for BC model
     X = np.random.normal(394.730011, 10, n)  # X is X(t=0) which is the expected price for t=1 (next period)
     A = np.identity(n) # initialize A(t=0) as an identity matrix
     # A = np.ones(n)  # initialize A(t=0) as an matrix full of ones
@@ -132,7 +132,8 @@ def DoSimulation():
 
     actions = np.zeros(n)  # current actions for each agent (discrete values of 1, -1 and 0 - Buy Sell Hold)
     orderPrice = np.zeros(n)  # prices of current order for each agent
-    Z_current = np.random.randint(10, 100, n)  # each agent holds between 10 to 1000 shares
+    Z_current = np.random.randint(100, 500, n)  # each agent holds between 10 to 1000 shares
+    print("sum of Z_current:", sum(Z_current))
     print("initial Z_current:")
     print(Z_current)
     price_list_BC = []
@@ -169,11 +170,7 @@ def DoSimulation():
         print("Order prices: ", orderPrice)
         print("price for next period: ", price)
 
-
-
-
-
-
+    print("sum of Z_current:", sum(Z_current))
     print(price_list_BC)
     print(std_BC)
 DoSimulation()

@@ -26,6 +26,7 @@ def BoundedConfidence(X, n, eps):
             if abs((X[i] - X[j])/X[i]) <= eps[i]:
                 count += 1
                 C[i][j] = 1 # mark C[i][j] with 1 to show that they are similar
+        # print(count)
         C[i] = np.where(C[i] == 1, 1/count, C[i]) # formula after eq.6
 
     return C
@@ -54,8 +55,8 @@ def DoSimulation():
     a = 1  # constant absolute risk aversion coefficient (CARA)
     var = 0.000173627  # variance of stock in risk premium
     z_s = 100  # supply per agent (assumed to be constant here under equilibrium condition)
-    alpha = np.random.uniform(0, 1, n)  # alpha [0,1] is the update propensity parameter.
-    eps_BC = np.random.uniform(0, 0.005, n) # epsilon for BC model
+    alpha = np.random.uniform(0, 0.6, n)  # alpha [0,1] is the update propensity parameter.
+    eps_BC = np.random.uniform(0, 0.01, n) # epsilon for BC model
     # eps_PA = np.random.uniform(0, 0.05, n)
     X_BC = np.random.normal(394.730011, 10, n) # X is X(t=0) which is the expected price for t=1 (next period)
     # X_BC = np.random.uniform(1, 10, n)
@@ -73,6 +74,7 @@ def DoSimulation():
     # --- simulation --- #
     for round in range(t):
 
+        print("round", round)
         X_prev = X_BC
         # --- obtain P(t), the equilibrium price on risky asset at time t ---
         P = PricingEq(X_BC, r, a, var, z_s, n)
