@@ -10,7 +10,6 @@ def getDeltaZ(a, var, r, p, X):
     print("this is X")
     print(X)
     # note that Z must be a discrete number
-    print(1/(a*var))
     deltaZ = (1/(a*var)) * (X - (1+r)*p) # equation 2
     deltaZ = deltaZ.astype(int)
     # Constraint on deltaZ: potentially place a upper limit on deltaZ (wealth constraint)
@@ -36,7 +35,7 @@ def getAction(Z_delta, Z_current, actions, n):
         elif (Z_delta[i] < 0):
             if (Z_current[i] > 0): # only if agent currently owns share
                 if(abs(Z_delta[i]) > Z_current[i]): # if agent owns less that Z_delta
-                    Z_delta[i] = (-Z_current[i])
+                    Z_delta[i] = -Z_current[i]
                 actions[i] = -1  # Sell
             else: actions[i] = 0  # agent does not own share, do nothing
         else:
