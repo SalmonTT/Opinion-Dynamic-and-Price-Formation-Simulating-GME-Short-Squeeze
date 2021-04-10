@@ -49,11 +49,13 @@ def getOrderPrice(action, beta, p, X, orderPrice, n, r):
     for i in range(n):
         if(action[i] == 1): # buy order
             # returns a float with two decimal places that is greater than or equal to (1+r)*p(t)-beta and less than x(t)
-            orderPrice[i] = random.uniform(((1+r)*p - beta[i]), X[i])
+            orderPrice[i] = random.uniform(((1+r)*p *(1-beta[i]) ), X[i])
         elif(action[i] == -1): # sell order
             # returns a float with two decimal places that is greater than or equal to x(t) and less than (1+r)*p(t)+beta
             # orderPrice[i] = decimal.Decimal(random.randrange(int(X[i] * 100), int(((1+r)*p + beta[i]) * 100))) / 100
-            orderPrice[i] = random.uniform(X[i], (1 + r) * p + beta[i])
+            orderPrice[i] = random.uniform(X[i], (1 + r) * p *(1+beta[i]) )
+        else:
+            orderPrice[i] = 0
 
     return orderPrice
 
@@ -93,7 +95,8 @@ def updateXwithBC(X, n, eps):
                 count += 1
                 C[i][j] = 1  # mark C[i][j] with 1 to show that they are similar
         C[i] = np.where(C[i] == 1, 1 / count, C[i])  # formula after eq.6
-
+        # print("agent", i)
+        # print(C[i])
     return C
 
 def updateXwithPA(X, P, n, eps):
@@ -110,20 +113,22 @@ def updateXwithPA(X, P, n, eps):
                 count += 1
                 C[i][j] = 1  # mark C[i][j] with 1 to show that they are similar
         C[i] = np.where(C[i] == 1, 1/count, C[i]) # formula after eq.6
+
     return C
 
 def DoSimulation():
 
     # --- Initialization --- #
     n = 100  # number of agents
-    t = 50 # number of rounds
+    t = 100 # number of rounds
     r = 0.0007700  # risk-free interest rate
     a = 1  # constant absolute risk aversion coefficient (CARA)
-    beta = np.random.uniform(0, 10, n) # An array, risk preference when it comes to placing order
+    # beta = np.random.uniform(0, 10, n) # An array, risk preference when it comes to placing order
+    beta = np.random.uniform(0, 0.01, n)
     price = 394.730011 # initialize p(t=0) to be price
     var = 15.57  # variance of stock in risk premium
     alpha = np.random.uniform(0, 1, n)  # alpha [0,1] is the update propensity parameter.
-    eps_BC = np.random.uniform(0, 0.02, n) # epsilon for BC model
+    eps_BC = np.random.uniform(0, 0.01, n) # epsilon for BC model
     X = np.random.normal(394.730011, 10, n)  # X is X(t=0) which is the expected price for t=1 (next period)
     A = np.identity(n) # initialize A(t=0) as an identity matrix
     # A = np.ones(n)  # initialize A(t=0) as an matrix full of ones
@@ -137,6 +142,7 @@ def DoSimulation():
     print(Z_current)
     price_list_BC = []
     std_BC = [X.std()]
+    # opinion_list_i = [X[10]]
 
 
     # --- Simulation --- #
@@ -152,9 +158,38 @@ def DoSimulation():
         price = updatePrice(Z_delta, actions, orderPrice, n)
         # Expected price dynamics
         C = updateXwithBC(X, n, eps_BC)
+        # print("C")
+        # for i in range(n):
+        #     print(sum(C[i]))
         # C = updateXwithPA(X_prev, P, n, eps_PA)
-        A = alpha*C + (1-alpha)*A
+        # A = alpha*C + (1-alpha)*A
+        # print("alpha")
+        # print(alpha)
+        # print(alpha.shape)
+        # print("C")
+        # print(C)
+        # print("1-alpha")
+        # print(1-alpha)
+        # tmp = alpha * C
+        # print("tmp", tmp.shape)
+        # print(tmp)
+        # tmp = np.zeros((n, n))
+        for i in range(n):
+            for j in range(n):
+                # tmp[i][j] = alpha[i]*C[i][j]
+                A[i][j] = alpha[i]*C[i][j] + (1-alpha[i])*A[i][j]
+        # print("tmp")
+        # print(tmp)
+        # print("A")
+        # print(A)
+        # A = alpha * C + (1 - alpha) * np.identity(n)
+        # print("A")
+        # for i in range(n):
+        #     print(sum(A[i]))
+        # A = alpha*C + (1-alpha)*(np.identity(n))
         X = np.matmul(A, X)
+
+        # opinion_list_i.append(X[10])
 
 
         price_list_BC.append(price)
@@ -172,5 +207,6 @@ def DoSimulation():
     print("sum of Z_current:", sum(Z_current))
     print(price_list_BC)
     print(std_BC)
+    # print(opinion_list_i)
 DoSimulation()
 
