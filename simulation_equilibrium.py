@@ -55,29 +55,34 @@ def DoSimulation():
     t = 50 # number of rounds
     r = 0.0007700  # risk-free interest rate
     a = 1  # constant absolute risk aversion coefficient (CARA)
-    var = 0.000173627  # variance of stock in risk premium
-    z_s = 100  # supply per agent (assumed to be constant here under equilibrium condition)
-    alpha = np.random.uniform(0, 0.8, n)  # alpha [0,1] is the update propensity parameter.
-    eps_BC = np.random.uniform(0, 0.01, n) # epsilon for BC model
-    eps_PA = np.random.uniform(0, 0.05, n)
-    X_BC = np.random.normal(394.730011, 10, n) # X is X(t=0) which is the expected price for t=1 (next period)
+    var = 0.445093979  # variance of stock in risk premium
+    z_s = 0  # supply per agent (assumed to be constant here under equilibrium condition)
+    alpha = np.random.uniform(0, 0.2, n)  # alpha [0,1] is the update propensity parameter.
+    # alpha = np.full(n, 0.2)
+    # print(alpha)
+    eps_BC = np.random.uniform(0, 0.05, n) # epsilon for BC model
+    # eps_BC = np.full(n, 0.2)
+    # print(eps_BC)
+    # eps_PA = np.random.uniform(0, 0.05, n)
+    X_BC = np.random.normal(19.95, 3, n) # X is X(t=0) which is the expected price for t=1 (next period)
+    # print(X_BC)
     # X_BC = np.random.uniform(1, 10, n)
-    X_PA = X_BC
+    # X_PA = X_BC
     # print(X_PA)
     A_BC = np.identity(n) # initialize A(t=0) as an identity matrix
-    A_PA = A_BC
+    # A_PA = A_BC
     # A = np.ones(n)  # initialize A(t=0) as an matrix full of ones
 
     price_list_BC = []
     std_BC = [X_BC.std()]
-    price_list_PA = []
-    std_PA = [X_PA.std()]
+    # price_list_PA = []
+    # std_PA = [X_PA.std()]
 
     # --- simulation --- #
-    for round in range(t):
+    for rd in range(t):
 
-        print("round", round)
-        X_prev = X_BC
+        # print("round", rd)
+        # X_prev = X_BC
         # --- obtain P(t), the equilibrium price on risky asset at time t ---
         P = PricingEq(X_BC, r, a, var, z_s, n)
         price_list_BC.append(P)
@@ -93,6 +98,7 @@ def DoSimulation():
             for j in range(n):
                 # tmp[i][j] = alpha[i]*C[i][j]
                 A_BC[i][j] = alpha[i]*C[i][j] + (1-alpha[i])*A_BC[i][j]
+            # print(sum(A_BC[i]))
         # for j in range(n):
         #     print(sum(A_BC[j]))
         # --- update X(round) -> X(round+1) ---
@@ -108,7 +114,7 @@ def DoSimulation():
         # print("X: ")
         # print(X)
 
-
+    #
     # for round in range(t):
     #
     #     X_prev = X_PA
@@ -119,11 +125,11 @@ def DoSimulation():
     #     # C = BoundedConfidence(X, n, eps_BC)
     #     C = PriceAdaptive(X_prev, P, n, eps_PA)
     #     # --- obtain A(t) ---
-    #     A_PA = alpha*C + (1-alpha)*(np.identity(n))
+    #     # A_PA = alpha*C + (1-alpha)*(np.identity(n))
     #     for i in range(n):
     #         for j in range(n):
     #             # tmp[i][j] = alpha[i]*C[i][j]
-    #             A_BC[i][j] = alpha[i] * C[i][j] + (1 - alpha[i]) * A_BC[i][j]
+    #             A_PA[i][j] = alpha[i] * C[i][j] + (1 - alpha[i]) * A_PA[i][j]
     #
     #     # --- update X(round) -> X(round+1) ---
     #     X_PA = np.matmul(A_PA, X_PA)
@@ -147,7 +153,7 @@ def DoSimulation():
     # print(std_PA)
     print("next round")
 
-for i in range(1):
+for i in range(5):
     DoSimulation()
 
 
