@@ -7,9 +7,10 @@ def getDeltaZ(a, var, r, p, X):
     period t+1), we we obtain z(t) which is the optimal # of shares held for current period t.
     '''
     print("price is", p)
-    print("this is X")
-    print(X)
+    # print("this is X")
+    # print(X)
     # note that Z must be a discrete number
+    # we want element-wise operation so this is ok
     deltaZ = (1/(a*var)) * (X - (1+r)*p) # equation 2
     deltaZ = deltaZ.astype(int)
     # Constraint on deltaZ: potentially place a upper limit on deltaZ (wealth constraint)
@@ -120,13 +121,13 @@ def DoSimulation():
 
     # --- Initialization --- #
     n = 100  # number of agents
-    t = 100 # number of rounds
+    t = 10 # number of rounds
     r = 0.0007700  # risk-free interest rate
     a = 1  # constant absolute risk aversion coefficient (CARA)
     # beta = np.random.uniform(0, 10, n) # An array, risk preference when it comes to placing order
     beta = np.random.uniform(0, 0.01, n)
     price = 394.730011 # initialize p(t=0) to be price
-    var = 15.57  # variance of stock in risk premium
+    var = 2  # variance of stock in risk premium
     alpha = np.random.uniform(0, 1, n)  # alpha [0,1] is the update propensity parameter.
     eps_BC = np.random.uniform(0, 0.01, n) # epsilon for BC model
     X = np.random.normal(394.730011, 10, n)  # X is X(t=0) which is the expected price for t=1 (next period)
@@ -174,10 +175,12 @@ def DoSimulation():
         # print("tmp", tmp.shape)
         # print(tmp)
         # tmp = np.zeros((n, n))
+
         for i in range(n):
             for j in range(n):
                 # tmp[i][j] = alpha[i]*C[i][j]
                 A[i][j] = alpha[i]*C[i][j] + (1-alpha[i])*A[i][j]
+
         # print("tmp")
         # print(tmp)
         # print("A")
@@ -186,23 +189,25 @@ def DoSimulation():
         # print("A")
         # for i in range(n):
         #     print(sum(A[i]))
-        # A = alpha*C + (1-alpha)*(np.identity(n))
+        # A = C*np.transpose(alpha) + A*np.transpose(1-alpha)
         X = np.matmul(A, X)
-
+        print(A.shape)
+        # X = np.dot(A, X)
+        print(X.shape)
         # opinion_list_i.append(X[10])
 
 
         price_list_BC.append(price)
         std_BC.append(X.std())
 
-        print("this is Z_delta:")
-        print(Z_delta)
-        print("actions are:")
-        print(actions)
-        print("this is Z_current after change:")
-        print(Z_current)
-        print("Order prices: ", orderPrice)
-        print("price for next period: ", price)
+        # print("this is Z_delta:")
+        # print(Z_delta)
+        # print("actions are:")
+        # print(actions)
+        # print("this is Z_current after change:")
+        # print(Z_current)
+        # print("Order prices: ", orderPrice)
+        # print("price for next period: ", price)
 
     print("sum of Z_current:", sum(Z_current))
     print(price_list_BC)
