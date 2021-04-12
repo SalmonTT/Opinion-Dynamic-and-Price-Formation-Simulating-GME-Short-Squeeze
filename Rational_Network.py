@@ -124,7 +124,7 @@ def DoSimulation():
     r = 0.0008588  # risk-free interest rate
     a = 1  # constant absolute risk aversion coefficient (CARA)
     # beta = np.random.uniform(0, 10, n) # An array, risk preference when it comes to placing order
-    beta = np.random.uniform(0, 0.1, n)
+    beta = np.random.uniform(0, 0.2, n)
     price = 19.95 # initialize p(t=0) to be price
     # var = 0.443208  # variance of stock in risk premium
     var = 1.152757
@@ -142,6 +142,7 @@ def DoSimulation():
     # print("initial Z_current:")
     # print(Z_current)
     price_list_BC = []
+    opinion_mean = [X.mean()]
     std_BC = [X.std()]
     # opinion_list_i = [X[10]]
 
@@ -165,7 +166,7 @@ def DoSimulation():
                 A[i][j] = alpha[i]*C[i][j] + (1-alpha[i])*A[i][j]
         X = np.matmul(A, X)
 
-
+        opinion_mean.append(X.mean())
         price_list_BC.append(price)
         std_BC.append(X.std())
 
@@ -181,9 +182,12 @@ def DoSimulation():
         #     print("price for next period: ", price)
 
     print("sum of Z_current:", sum(Z_current))
-    print(price_list_BC)
     print(price_list_BC[0], price_list_BC[-1])
+
+    print(price_list_BC)
+    print(opinion_mean)
     print(std_BC)
+    print()
     # print(opinion_list_i)
 
 for i in range(5):

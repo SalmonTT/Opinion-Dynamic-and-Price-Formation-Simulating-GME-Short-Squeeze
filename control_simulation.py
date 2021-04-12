@@ -102,7 +102,7 @@ def DoSimulation():
 
     # --- Initialization --- #
     n = 100  # number of agents
-    t = 50 # number of rounds
+    t = 50  # number of rounds
     r = 0.0008588  # risk-free interest rate
     a = 1  # constant absolute risk aversion coefficient (CARA)
     # beta = np.random.uniform(0, 10, n) # An array, risk preference when it comes to placing order
@@ -130,7 +130,6 @@ def DoSimulation():
 
     add_agents_sequence = [1, 0, 14, 9, 4, 7, 3, 5, 19, 17, 17, 9, 5, 5, 3, 7, 4, 6, 8]
 
-
     # --- Simulation --- #
 
     for rd in range(t):
@@ -141,24 +140,47 @@ def DoSimulation():
             for agent in range(add_agents_sequence[rd]):
                 Z_current.append(0)
                 Z_delta.append(0)
-                X = np.concatenate((X, np.random.normal(19.95, 3, 1)))
-                print(X)
+                X = np.concatenate((X, np.random.normal(price, 3, 1)))
+                alpha = np.concatenate((alpha, np.random.uniform(0, 0.8, 1)))
+                eps_BC = np.concatenate((eps_BC, np.random.uniform(0, 0.1, 1)))
+                beta = np.concatenate((beta, np.random.uniform(0, 0.1, 1)))
+                actions = np.concatenate((actions, np.zeros(1)))
+                orderPrice = np.concatenate((orderPrice, np.zeros(1)))
+                # print(X)
             print("added ", add_agents_sequence[rd], "agents")
 
+        n = len(X)
 
         # Portfolio holding dynamics
         Z_delta = getDeltaZ(a, var, r, price, X)
         print("Z_delta for ", len(Z_delta), " agents")
         print(Z_delta)
         actions = getAction(Z_delta, Z_current, actions, n)
-        Z_current = updateCurrentZ(Z_current,Z_delta,n)
+        print("actions size:", len(actions))
+        Z_current = updateCurrentZ(Z_current, Z_delta, n)
         print("Z_current for ", len(Z_current), " agents")
         print(Z_current)
         # Price dynamics
         orderPrice = getOrderPrice(actions, beta, price, X, orderPrice, n, r)
+        print("orderprice size:", len(orderPrice))
+        print(orderPrice)
         price = updatePrice(Z_delta, actions, orderPrice, n)
+
+
+
         # Expected price dynamics
         C = updateXwithBC(X, n, eps_BC)
+        if rd < len(add_agents_sequence) :
+            A = np.pad(A, ((0, add_agents_sequence[rd]),(0, add_agents_sequence[rd])), mode='constant', constant_values=0)
+            for i in range(add_agents_sequence[rd]):
+                A[-(i+1)][-(i+1)] = 1
+            print("A updated in shape")
+            print("A.shape:", A.shape)
+            # np.savetxt("A{0}.csv".format(rd), A, delimiter=",")
+            # for i in range(len(X)):
+            #     print(sum(A[i]))
+        # print("lenX:", len(X))
+        # print("lenalpha:", len(alpha))
         for i in range(n):
             for j in range(n):
                 # tmp[i][j] = alpha[i]*C[i][j]
