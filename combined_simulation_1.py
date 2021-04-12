@@ -150,7 +150,7 @@ def getOrderPriceSimple(Z_delta, r, p, orderPconstant):
 def DoSimulation():
     '''Rational Network Initialization'''
     n = 100  # number of agents
-    t = 50  # number of rounds
+    t = 30  # number of rounds
     r = 0.0008588  # risk-free interest rate
     a = 1  # constant absolute risk aversion coefficient (CARA)
     beta = np.random.uniform(0, 0.1, n)  # An array, risk preference when it comes to placing order
@@ -162,7 +162,7 @@ def DoSimulation():
     A = np.identity(n)  # initialize A(t=0) as an identity matrix
     actions = np.zeros(n)  # current actions for each agent (discrete values of 1, -1 and 0 - Buy Sell Hold)
     order_price_rational = np.zeros(n)  # prices of current order for each agent
-    Z_current_rational = np.random.randint(10, 100, n)  # each agent holds between 10 to 1000 shares
+    Z_current_rational = np.random.randint(100, 500, n)  # each agent holds between 10 to 1000 shares
 
     print("initial Z_current for rational agents:")
     print(Z_current_rational)
@@ -172,8 +172,8 @@ def DoSimulation():
     '''Irrational Network Initialization'''
     Z_current_irrational = [] # length of this list indicates the number of total irrational agents in the network
     Z_delta_irrational = []
-    max_Z_delta = 100
-    orderPconstant = 0.1
+    max_Z_delta = 30
+    orderPconstant = 0.3
     GME_volume_array = [14927612
                     ,7060665
                     ,144501736
@@ -226,15 +226,16 @@ def DoSimulation():
         Z_delta_rational = getDeltaZ(a, var, r, price, X)
         actions = getAction(Z_delta_rational, Z_current_rational, actions, n)
         Z_current_rational = updateCurrentZ(Z_current_rational, Z_delta_rational, n)
-
+        print("this is the Z_current of rational agents: ")
+        print(Z_current_rational)
 
         # Price dynamics (takes into consideration both rational and irrational agents orders
         order_price_rational = getOrderPrice(actions, beta, price, X, order_price_rational, n, r)
-        print("this is orderprice rational:")
-        print(order_price_rational)
+        # print("this is orderprice rational:")
+        # print(order_price_rational)
         order_price_irrational = getOrderPriceSimple(Z_delta_irrational, r, price, orderPconstant)
-        print("this is orderprice irrational:")
-        print(order_price_irrational)
+        # print("this is orderprice irrational:")
+        # print(order_price_irrational)
         price = updatePrice(Z_delta_rational, Z_delta_irrational, actions, order_price_rational, order_price_irrational)
 
 

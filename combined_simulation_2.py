@@ -209,17 +209,19 @@ def DoSimulation():
 
         # Irrational agents Z_delta dynamics
         Z_delta_irrational = getDeltaZSimple(Z_delta_irrational, Z_current_irrational, max_current_Z, max_Z_delta)
-        print("this is the Z_delta for irrational agents")
-        print(Z_delta_irrational)
+        # print("this is the Z_delta for irrational agents")
+        # print(Z_delta_irrational)
         zipped_lists = zip(Z_current_irrational, Z_delta_irrational)
         Z_current_irrational = [x + y for (x, y) in zipped_lists]
         print("this is the Z_current of irrational agents: ")
         print(Z_current_irrational)
+        print("this is the Z_current of rational agents: ")
+        print(Z_current_rational)
 
         # Rational agents Z_delta dynamics
         Z_delta_rational = getDeltaZ(a, var, r, price, X)
-        print("this is Z_delta for rational agents")
-        print(Z_delta_rational)
+        # print("this is Z_delta for rational agents")
+        # print(Z_delta_rational)
         actions = getAction(Z_delta_rational, Z_current_rational, actions, n)
         Z_current_rational = updateCurrentZ(Z_current_rational, Z_delta_rational, n)
 
