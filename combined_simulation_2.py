@@ -15,7 +15,8 @@ Things to be explored:
 def getDeltaZ(a, var, r, p, X):
     '''
     given the current price (p(t)) and current opinion (x(t), note x(t) is expected price for
-    period t+1), we we obtain z(t) which is the optimal # of shares held for current period t.
+    period t+1), we we obtain z(t) which is the optimal # of
+    shares held for current period t.
     '''
     print("price is", p)
     # print("this is X")
@@ -50,10 +51,10 @@ def getAction(Z_delta, Z_current, actions, n):
                 actions[i] = -1  # Sell
             else:
                 actions[i] = 0  # agent does not own share, do nothing
-                '''  '''
                 Z_delta[i] = 0
         else:
             actions[i] = 0  # Hold
+
     return actions
 
 def getOrderPrice(action, beta, p, X, orderPrice, n, r):
@@ -68,6 +69,8 @@ def getOrderPrice(action, beta, p, X, orderPrice, n, r):
             # returns a float with two decimal places that is greater than or equal to x(t) and less than (1+r)*p(t)+beta
             # orderPrice[i] = decimal.Decimal(random.randrange(int(X[i] * 100), int(((1+r)*p + beta[i]) * 100))) / 100
             orderPrice[i] = random.uniform(X[i], (1 + r) * p *(1 + beta[i]))
+        elif (action[i] == 0):
+            orderPrice[i] = 0
 
     return orderPrice
 
@@ -154,7 +157,7 @@ def DoSimulation():
     A = np.identity(n)  # initialize A(t=0) as an identity matrix
     actions = np.zeros(n)  # current actions for each agent (discrete values of 1, -1 and 0 - Buy Sell Hold)
     order_price_rational = np.zeros(n)  # prices of current order for each agent
-    Z_current_rational = np.random.randint(10, 100, n)
+    Z_current_rational = np.random.randint(100, 500, n)
 
     print("initial Z_current for rational agents:")
     print(Z_current_rational)
@@ -162,7 +165,7 @@ def DoSimulation():
     X_std_Rational = [X.std()]
 
     '''Irrational Network Initialization'''
-    max_current_Z = 1000
+    max_current_Z = 500
     Z_current_irrational = [] # length of this list indicates the number of total irrational agents in the network
     Z_delta_irrational = []
     max_Z_delta = 100
@@ -213,17 +216,21 @@ def DoSimulation():
         print("this is the Z_current of irrational agents: ")
         print(Z_current_irrational)
 
-
-
         # Rational agents Z_delta dynamics
         Z_delta_rational = getDeltaZ(a, var, r, price, X)
+        print("this is Z_delta for rational agents")
+        print(Z_delta_rational)
         actions = getAction(Z_delta_rational, Z_current_rational, actions, n)
         Z_current_rational = updateCurrentZ(Z_current_rational, Z_delta_rational, n)
 
 
         # Price dynamics (takes into consideration both rational and irrational agents orders
         order_price_rational = getOrderPrice(actions, beta, price, X, order_price_rational, n, r)
+        print("this is orderprice rational:")
+        print(order_price_rational)
         order_price_irrational = getOrderPriceSimple(Z_delta_irrational, r, price, orderPconstant)
+        print("this is orderprice irrational:")
+        print(order_price_irrational)
         price = updatePrice(Z_delta_rational, Z_delta_irrational, actions, order_price_rational, order_price_irrational)
 
 
@@ -245,7 +252,7 @@ def DoSimulation():
         # print(actions)
         # print("this is Z_current after change:")
         # print(Z_current)
-        # print("Order prices: ", orderPrice)
+
         print("price for next period: ", price)
     print(price_list_Rational)
 

@@ -138,16 +138,6 @@ def getDeltaZSimple(delta_Z, max_delta):
 
     return delta_Z
 
-
-def getDeltaZvoter():
-    '''
-    binary opinion: buy (1), hold (0)
-    if buy, delta_Z is a constant
-    '''
-    delta_Z = []
-    return delta_Z
-
-
 def getOrderPriceSimple(Z_delta, r, p, orderPconstant):
     '''
     orderPconstant is a list of constants where each constant > 0 (to be initialized in the beginning)
@@ -156,14 +146,6 @@ def getOrderPriceSimple(Z_delta, r, p, orderPconstant):
     for i in range(len(Z_delta)):
         orderPrice[i] = random.uniform((1+r)*p, (1+r)*p*(1+orderPconstant))
     return orderPrice
-
-
-def getOrderPriceComplex(orderPrice, n, r, X, p):
-    for i in range(n):
-        orderPrice[i] = random.uniform((1 + r) * p, X[i])
-    return orderPrice
-
-
 
 def DoSimulation():
     '''Rational Network Initialization'''
@@ -248,7 +230,11 @@ def DoSimulation():
 
         # Price dynamics (takes into consideration both rational and irrational agents orders
         order_price_rational = getOrderPrice(actions, beta, price, X, order_price_rational, n, r)
+        print("this is orderprice rational:")
+        print(order_price_rational)
         order_price_irrational = getOrderPriceSimple(Z_delta_irrational, r, price, orderPconstant)
+        print("this is orderprice irrational:")
+        print(order_price_irrational)
         price = updatePrice(Z_delta_rational, Z_delta_irrational, actions, order_price_rational, order_price_irrational)
 
 
