@@ -37,7 +37,9 @@ def getAction(Z_delta, Z_current, actions, n):
                 if(abs(Z_delta[i]) > Z_current[i]): # if agent owns less that Z_delta
                     Z_delta[i] = -Z_current[i]
                 actions[i] = -1  # Sell
-            else: actions[i] = 0  # agent does not own share, do nothing
+            else:
+                actions[i] = 0  # agent does not own share, do nothing
+                Z_delta[i] = 0 # reset Z_delta
         else:
             actions[i] = 0 # Hold
     return actions
@@ -68,6 +70,8 @@ def updatePrice(Z_delta, actions, orderPrices, n):
     '''
     bids = [] # an array of all bidding prices
     asks = [] # an array of all asking prices
+    # filter out Z_delta where action[i] == 0
+    # Z_delta = Z_delta
     order_sum = sum(map(abs, Z_delta)) # sum of the absolute value of orders
     for i in range(n):
         if(actions[i] == 1):
@@ -102,7 +106,7 @@ def DoSimulation():
 
     # --- Initialization --- #
     n = 100  # number of agents
-    t = 50  # number of rounds
+    t = 200  # number of rounds
     r = 0.0008588  # risk-free interest rate
     a = 1  # constant absolute risk aversion coefficient (CARA)
     # beta = np.random.uniform(0, 10, n) # An array, risk preference when it comes to placing order
@@ -153,17 +157,18 @@ def DoSimulation():
 
         # Portfolio holding dynamics
         Z_delta = getDeltaZ(a, var, r, price, X)
-        print("Z_delta for ", len(Z_delta), " agents")
-        print(Z_delta)
+        # print("Z_delta for ", len(Z_delta), " agents")
+        # print(Z_delta)
         actions = getAction(Z_delta, Z_current, actions, n)
-        print("actions size:", len(actions))
+        # print("actions size:", len(actions))
+        # print(actions)
         Z_current = updateCurrentZ(Z_current, Z_delta, n)
-        print("Z_current for ", len(Z_current), " agents")
-        print(Z_current)
+        # print("Z_current for ", len(Z_current), " agents")
+        # print(Z_current)
         # Price dynamics
         orderPrice = getOrderPrice(actions, beta, price, X, orderPrice, n, r)
-        print("orderprice size:", len(orderPrice))
-        print(orderPrice)
+        # print("orderprice size:", len(orderPrice))
+        # print(orderPrice)
         price = updatePrice(Z_delta, actions, orderPrice, n)
 
 

@@ -50,6 +50,8 @@ def getAction(Z_delta, Z_current, actions, n):
                 actions[i] = -1  # Sell
             else:
                 actions[i] = 0  # agent does not own share, do nothing
+                '''  '''
+                Z_delta[i] = 0
         else:
             actions[i] = 0  # Hold
     return actions
@@ -61,11 +63,11 @@ def getOrderPrice(action, beta, p, X, orderPrice, n, r):
     for i in range(n):
         if (action[i] == 1):  # buy order
             # returns a float with two decimal places that is greater than or equal to (1+r)*p(t)-beta and less than x(t)
-            orderPrice[i] = random.uniform(((1 + r) * p - beta[i]), X[i])
+            orderPrice[i] = random.uniform(((1 + r) * p * (1 - beta[i])), X[i])
         elif (action[i] == -1):  # sell order
             # returns a float with two decimal places that is greater than or equal to x(t) and less than (1+r)*p(t)+beta
             # orderPrice[i] = decimal.Decimal(random.randrange(int(X[i] * 100), int(((1+r)*p + beta[i]) * 100))) / 100
-            orderPrice[i] = random.uniform(X[i], (1 + r) * p + beta[i])
+            orderPrice[i] = random.uniform(X[i], (1 + r) * p *(1 + beta[i]))
 
     return orderPrice
 
