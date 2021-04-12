@@ -1,6 +1,20 @@
 import numpy as np
 import random
 
+'''
+version 1: 
+- add agents from round 0 continuously for a number of rounds
+- added agents continues buy stocks
+- no max Z_current (irrational agents can buy as much as they desired
+- Irrational agents continues to buy till the end of simulation
+
+Things to be explored:
+- number of agents added at each round (manually set add_agents_sequence)
+- Price
+- orderPconstant
+- Max_delta 
+- Z_Current level for irrational agents 
+'''
 
 def getDeltaZ(a, var, r, p, X):
     '''
