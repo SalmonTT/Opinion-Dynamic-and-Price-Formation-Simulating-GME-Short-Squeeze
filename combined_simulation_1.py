@@ -16,12 +16,13 @@ Things to be explored:
 - Z_Current level for irrational agents 
 '''
 
+
 def getDeltaZ(a, var, r, p, X):
     '''
     given the current price (p(t)) and current opinion (x(t), note x(t) is expected price for
     period t+1), we we obtain z(t) which is the optimal # of shares held for current period t.
     '''
-    print("price is", p)
+    # print("price is", p)
     # print("this is X")
     # print(X)
     # note that Z must be a discrete number
@@ -46,21 +47,24 @@ def getAction(Z_delta, Z_current, actions, n):
     Compare the optimal # of shares held by agents during this period and # shares held during last period
     and update the actions for current period
     '''
+    trading_volume = 0
     for i in range(n):
         if (Z_delta[i] > 0):
             actions[i] = 1  # Buy
+            trading_volume = trading_volume + Z_delta[i]
         elif (Z_delta[i] < 0):
             if (Z_current[i] > 0):  # only if agent currently owns share
                 if (abs(Z_delta[i]) > Z_current[i]):  # if agent owns less that Z_delta
                     Z_delta[i] = -Z_current[i]
                 actions[i] = -1  # Sell
+                trading_volume = trading_volume + abs(Z_delta[i])
             else:
                 actions[i] = 0  # agent does not own share, do nothing
                 Z_delta[i] = 0
         else:
             actions[i] = 0  # Hold
 
-    return actions
+    return actions, trading_volume
 
 
 def getOrderPrice(action, beta, p, X, orderPrice, n, r):
@@ -86,7 +90,7 @@ def updatePrice(Z_delta_rational, Z_delta_irrational, actions_rational, orderPri
         - After orders are executed, we update price p(t) using the Bid-Ask prices.
     Returns the new price for next period
     '''
-    actions_irrational = [1]*len(orderPricesIrrational) # list of 1s same length as orderPricesIrrational
+    actions_irrational = [1] * len(orderPricesIrrational)  # list of 1s same length as orderPricesIrrational
     Z_delta_rational = Z_delta_rational.tolist()
     Z_delta = Z_delta_rational + Z_delta_irrational
     actions_rational = actions_rational.tolist()
@@ -138,96 +142,105 @@ def getDeltaZSimple(delta_Z, max_delta):
 
     return delta_Z
 
+
 def getOrderPriceSimple(Z_delta, r, p, orderPconstant):
     '''
     orderPconstant is a list of constants where each constant > 0 (to be initialized in the beginning)
     '''
     orderPrice = np.zeros(len(Z_delta))
     for i in range(len(Z_delta)):
-        orderPrice[i] = random.uniform((1+r)*p, (1+r)*p*(1+orderPconstant))
+        orderPrice[i] = random.uniform((1 + r) * p, (1 + r) * p * (1 + orderPconstant))
     return orderPrice
 
-def DoSimulation():
+
+def DoSimulation1(n, t, r, a, beta, price, var, alpha, eps_BC, X, A, actions, order_price_rational, Z_current_rational,
+                  max_Z_delta, orderPconstant, add_agents_sequence):
     '''Rational Network Initialization'''
-    n = 100  # number of agents
-    t = 30  # number of rounds
-    r = 0.0008588  # risk-free interest rate
-    a = 1  # constant absolute risk aversion coefficient (CARA)
-    beta = np.random.uniform(0, 0.1, n)  # An array, risk preference when it comes to placing order
-    price = 19.95  # initialize p(t=0) to be price
-    var = 1.152757  # variance of stock in risk premium
-    alpha = np.random.uniform(0, 0.8, n)  # alpha [0,1] is the update propensity parameter.
-    eps_BC = np.random.uniform(0, 0.1, n)  # epsilon for BC model
-    X = np.random.normal(19.95, 3, n)  # X is X(t=0) which is the expected price for t=1 (next period)
-    A = np.identity(n)  # initialize A(t=0) as an identity matrix
-    actions = np.zeros(n)  # current actions for each agent (discrete values of 1, -1 and 0 - Buy Sell Hold)
-    order_price_rational = np.zeros(n)  # prices of current order for each agent
-    Z_current_rational = np.random.randint(100, 500, n)  # each agent holds between 10 to 1000 shares
+    # n = 100  # number of agents
+    # t = 30  # number of rounds
+    # r = 0.0008588  # risk-free interest rate
+    # a = 1  # constant absolute risk aversion coefficient (CARA)
+    # beta = np.random.uniform(0, 0.1, n)  # An array, risk preference when it comes to placing order
+    # price = 19.95  # initialize p(t=0) to be price
+    # var = 1.152757  # variance of stock in risk premium
+    # alpha = np.random.uniform(0, 0.8, n)  # alpha [0,1] is the update propensity parameter.
+    # eps_BC = np.random.uniform(0, 0.1, n)  # epsilon for BC model
+    # X = np.random.normal(19.95, 3, n)  # X is X(t=0) which is the expected price for t=1 (next period)
+    # A = np.identity(n)  # initialize A(t=0) as an identity matrix
+    # actions = np.zeros(n)  # current actions for each agent (discrete values of 1, -1 and 0 - Buy Sell Hold)
+    # order_price_rational = np.zeros(n)  # prices of current order for each agent
+    # Z_current_rational = np.random.randint(100, 500, n)  # each agent holds between 10 to 1000 shares
 
-    print("initial Z_current for rational agents:")
-    print(Z_current_rational)
-    price_list_Rational = []
+    # print("initial Z_current for rational agents:")
+    # print(Z_current_rational)
+    price_list_Rational = [price]
+    X_opinion = [X.mean()]
     X_std_Rational = [X.std()]
+    trading_volume_rational = [0]
+    trading_volume_irrational = [0]
+    total_volume_rational = [sum(Z_current_rational)]
+    total_volume_irrational = [0]
 
-    '''Irrational Network Initialization'''
-    Z_current_irrational = [] # length of this list indicates the number of total irrational agents in the network
+    # '''Irrational Network Initialization'''
+    Z_current_irrational = []  # length of this list indicates the number of total irrational agents in the network
     Z_delta_irrational = []
-    max_Z_delta = 30
-    orderPconstant = 0.3
-    GME_volume_array = [14927612
-                    ,7060665
-                    ,144501736
-                    ,93717410
-                    ,46866358
-                    ,74721924
-                    ,33471789
-                    ,57079754
-                    ,197157946
-                    ,177874000
-                    ,178587974
-                    ,93396666
-                    ,58815805
-                    ,50566055
-                    ,37382152
-                    ,78183071
-                    ,42698511
-                    ,62427275
-                    ,81345013]
-    # number of agents added at each round proportional to the volume traded that day (Jan 11 - Feb 5)
-    add_agents_sequence = [x/10000000 for x in GME_volume_array]
-    add_agents_sequence = [int(x) for x in add_agents_sequence]
-    print(add_agents_sequence)
+    # max_Z_delta = 30
+    # orderPconstant = 0.3
+    # GME_volume_array = [14927612
+    #                 ,7060665
+    #                 ,144501736
+    #                 ,93717410
+    #                 ,46866358
+    #                 ,74721924
+    #                 ,33471789
+    #                 ,57079754
+    #                 ,197157946
+    #                 ,177874000
+    #                 ,178587974
+    #                 ,93396666
+    #                 ,58815805
+    #                 ,50566055
+    #                 ,37382152
+    #                 ,78183071
+    #                 ,42698511
+    #                 ,62427275
+    #                 ,81345013]
+    # # number of agents added at each round proportional to the volume traded that day (Jan 11 - Feb 5)
+    # add_agents_sequence = [x/10000000 for x in GME_volume_array]
+    # add_agents_sequence = [int(x) for x in add_agents_sequence]
+    # print(add_agents_sequence)
 
     # --- Simulation --- #
 
     for round in range(t):
-        print("---------------- ROUND ", round, " ----------------")
+        # print("---------------- ROUND ", round, " ----------------")
         # adding irrational agents
-        if(round < len(add_agents_sequence)):
+        if (round < len(add_agents_sequence)):
             # initialized the current # of stocks held to be 0
             for agent in range(add_agents_sequence[round]):
                 Z_current_irrational.append(0)
                 Z_delta_irrational.append(0)
-            print("added ", add_agents_sequence[round], "agents")
-
+            # print("added ", add_agents_sequence[round], "agents")
 
         # Irrational agents Z_delta dynamics
         Z_delta_irrational = getDeltaZSimple(Z_delta_irrational, max_Z_delta)
-        print("this is the Z_delta for irrational agents")
-        print(Z_delta_irrational)
+        trading_volume_irrational.append(sum(Z_delta_irrational))
+        # print("this is the Z_delta for irrational agents")
+        # print(Z_delta_irrational)
         zipped_lists = zip(Z_current_irrational, Z_delta_irrational)
         Z_current_irrational = [x + y for (x, y) in zipped_lists]
-        print("this is the Z_current of irrational agents: ")
-        print(Z_current_irrational)
-
-
+        total_volume_irrational.append(sum(Z_current_irrational))
+        # print("this is the Z_current of irrational agents: ")
+        # print(Z_current_irrational)
 
         # Rational agents Z_delta dynamics
         Z_delta_rational = getDeltaZ(a, var, r, price, X)
-        actions = getAction(Z_delta_rational, Z_current_rational, actions, n)
+        actions, trading_volume = getAction(Z_delta_rational, Z_current_rational, actions, n)
+        trading_volume_rational.append(trading_volume)
         Z_current_rational = updateCurrentZ(Z_current_rational, Z_delta_rational, n)
-        print("this is the Z_current of rational agents: ")
-        print(Z_current_rational)
+        total_volume_rational.append(sum(Z_current_rational))
+        # print("this is the Z_current of rational agents: ")
+        # print(Z_current_rational)
 
         # Price dynamics (takes into consideration both rational and irrational agents orders
         order_price_rational = getOrderPrice(actions, beta, price, X, order_price_rational, n, r)
@@ -237,7 +250,6 @@ def DoSimulation():
         # print("this is orderprice irrational:")
         # print(order_price_irrational)
         price = updatePrice(Z_delta_rational, Z_delta_irrational, actions, order_price_rational, order_price_irrational)
-
 
         # Rational agents Expected price dynamics
         C = updateXwithBC(X, n, eps_BC)
@@ -249,6 +261,7 @@ def DoSimulation():
         X = np.matmul(A, X)
 
         price_list_Rational.append(price)
+        X_opinion.append(X.mean())
         X_std_Rational.append(X.std())
 
         # print("this is Z_delta:")
@@ -258,7 +271,17 @@ def DoSimulation():
         # print("this is Z_current after change:")
         # print(Z_current)
         # print("Order prices: ", orderPrice)
-        print("price for next period: ", price)
+        # print("price for next period: ", price)
+    print("price_list_Rational + X_opinion")
     print(price_list_Rational)
+    print(X_opinion)
+    print("X_std_Rational")
+    print(X_std_Rational)
+    print("trading_volume_rational + trading_volume_irrational")
+    print(trading_volume_rational)
+    print(trading_volume_irrational)
+    print("total_volume_rational + total_volume_irrational")
+    print(total_volume_rational)
+    print(total_volume_irrational)
 
-DoSimulation()
+
