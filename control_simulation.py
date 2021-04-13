@@ -2,7 +2,7 @@ import numpy as np
 import random
 
 
-def getDeltaZ(a, var, r, p, X):
+def getDeltaZcontrol(a, var, r, p, X):
     '''
     given the current price (p(t)) and current opinion (x(t), note x(t) is expected price for
     period t+1), we we obtain z(t) which is the optimal # of shares held for current period t.
@@ -18,7 +18,7 @@ def getDeltaZ(a, var, r, p, X):
     return deltaZ
 
 
-def updateCurrentZ(Z_current, Z_delta, n):
+def updateCurrentZcontrol(Z_current, Z_delta, n):
     for i in range(n):
         if (Z_current[i] + Z_delta[i]) < 0:
             Z_current[i] = 0
@@ -27,7 +27,7 @@ def updateCurrentZ(Z_current, Z_delta, n):
     return Z_current
 
 
-def getAction(Z_delta, Z_current, actions, n):
+def getActioncontrol(Z_delta, Z_current, actions, n):
     '''
     Compare the optimal # of shares held by agents during this period and # shares held during last period
     and update the actions for current period
@@ -51,7 +51,7 @@ def getAction(Z_delta, Z_current, actions, n):
     return actions, trading_volume
 
 
-def getOrderPrice(action, beta, p, X, orderPrice, n, r):
+def getOrderPricecontrol(action, beta, p, X, orderPrice, n, r):
     '''
     return the prices of orders for each agent at current period t
     '''
@@ -69,7 +69,7 @@ def getOrderPrice(action, beta, p, X, orderPrice, n, r):
     return orderPrice
 
 
-def updatePrice(Z_delta, actions, orderPrices, n):
+def updatePricecontrol(Z_delta, actions, orderPrices, n):
     '''
     Order matching:
         - ignore the traditional order matching mechanism and fulfill everyone's orders
@@ -92,7 +92,7 @@ def updatePrice(Z_delta, actions, orderPrices, n):
     return sum(bids) + sum(asks)
 
 
-def updateXwithBC(X, n, eps):
+def updateXwithBCcontrol(X, n, eps):
     '''
        Get C the update matrix to update X using BC
     '''
@@ -169,25 +169,25 @@ def DoSimulationControl(n, t, r, a, beta, price, var, alpha, eps_BC, X, A, Z_cur
         n = len(X)
 
         # Portfolio holding dynamics
-        Z_delta = getDeltaZ(a, var, r, price, X)
+        Z_delta = getDeltaZcontrol(a, var, r, price, X)
         # print("Z_delta for ", len(Z_delta), " agents")
         # print(Z_delta)
-        actions, trading_volume = getAction(Z_delta, Z_current, actions, n)
+        actions, trading_volume = getActioncontrol(Z_delta, Z_current, actions, n)
         trading_volume_rational.append(trading_volume)
         # print("actions size:", len(actions))
         # print(actions)
-        Z_current = updateCurrentZ(Z_current, Z_delta, n)
+        Z_current = updateCurrentZcontrol(Z_current, Z_delta, n)
         total_volume_rational.append(sum(Z_current))
         # print("Z_current for ", len(Z_current), " agents")
         # print(Z_current)
         # Price dynamics
-        orderPrice = getOrderPrice(actions, beta, price, X, orderPrice, n, r)
+        orderPrice = getOrderPricecontrol(actions, beta, price, X, orderPrice, n, r)
         # print("orderprice size:", len(orderPrice))
         # print(orderPrice)
-        price = updatePrice(Z_delta, actions, orderPrice, n)
+        price = updatePricecontrol(Z_delta, actions, orderPrice, n)
 
         # Expected price dynamics
-        C = updateXwithBC(X, n, eps_BC)
+        C = updateXwithBCcontrol(X, n, eps_BC)
         if rd < len(add_agents_sequence):
             A = np.pad(A, ((0, add_agents_sequence[rd]), (0, add_agents_sequence[rd])), mode='constant',
                        constant_values=0)
@@ -233,7 +233,4 @@ def DoSimulationControl(n, t, r, a, beta, price, var, alpha, eps_BC, X, A, Z_cur
     print(trading_volume_rational)
     print("total_volume")
     print(total_volume_rational)
-#
-# for i in range(5):
-#     print("round ", i)
-#     DoSimulation()
+
