@@ -1,6 +1,10 @@
 import numpy as np
 import random
 
+'''
+Control Simulation:
+- Add rational agents to the network
+'''
 
 def getDeltaZ(a, var, r, p, X):
     '''
@@ -128,7 +132,7 @@ def DoSimulationControl(n, t, r, a, beta, price, var, alpha, eps_BC, X, A, Z_cur
     # X = np.random.normal(19.95, 3, n)  # X is X(t=0) which is the expected price for t=1 (next period)
     # A = np.identity(n) # initialize A(t=0) as an identity matrix
     # A = np.ones(n)  # initialize A(t=0) as an matrix full of ones
-
+    # print("X", X)
     actions = np.zeros(n)  # current actions for each agent (discrete values of 1, -1 and 0 - Buy Sell Hold)
     orderPrice = np.zeros(n)  # prices of current order for each agent
     # Z_current = np.random.randint(100, 500, n)  # each agent holds between 10 to 1000 shares

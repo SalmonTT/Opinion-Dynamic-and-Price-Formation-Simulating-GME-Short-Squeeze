@@ -12,7 +12,7 @@ Things to be explored:
 - Price dynamics after setting max_current
 '''
 
-def getDeltaZ(a, var, r, p, X):
+def getDeltaZ2(a, var, r, p, X):
     '''
     given the current price (p(t)) and current opinion (x(t), note x(t) is expected price for
     period t+1), we we obtain z(t) which is the optimal # of
@@ -28,7 +28,7 @@ def getDeltaZ(a, var, r, p, X):
 
     return deltaZ
 
-def updateCurrentZ(Z_current, Z_delta, n):
+def updateCurrentZ2(Z_current, Z_delta, n):
     for i in range(n):
         if (Z_current[i] + Z_delta[i]) < 0:
             Z_current[i] = 0
@@ -36,7 +36,7 @@ def updateCurrentZ(Z_current, Z_delta, n):
             Z_current[i] += Z_delta[i]
     return Z_current
 
-def getAction(Z_delta, Z_current, actions, n):
+def getAction2(Z_delta, Z_current, actions, n):
     '''
     Compare the optimal # of shares held by agents during this period and # shares held during last period
     and update the actions for current period
@@ -60,7 +60,7 @@ def getAction(Z_delta, Z_current, actions, n):
 
     return actions, trading_volume
 
-def getOrderPrice(action, beta, p, X, orderPrice, n, r):
+def getOrderPrice2(action, beta, p, X, orderPrice, n, r):
     '''
     return the prices of orders for each agent at current period t
     '''
@@ -77,7 +77,7 @@ def getOrderPrice(action, beta, p, X, orderPrice, n, r):
 
     return orderPrice
 
-def updatePrice(Z_delta_rational, Z_delta_irrational, actions_rational, orderPricesRational, orderPricesIrrational, rd):
+def updatePrice2(Z_delta_rational, Z_delta_irrational, actions_rational, orderPricesRational, orderPricesIrrational, rd):
     '''
     Order matching:
         - ignore the traditional order matching mechanism and fulfill everyone's orders
@@ -108,7 +108,7 @@ def updatePrice(Z_delta_rational, Z_delta_irrational, actions_rational, orderPri
     # print("bidding prices:", bids)
     return sum(bids) + sum(asks)
 
-def updateXwithBC(X, n, eps):
+def updateXwithBC2(X, n, eps):
     '''
        Get C the update matrix to update X using BC
     '''
@@ -129,7 +129,7 @@ def updateXwithBC(X, n, eps):
 
 ##### Irrational agents dynamics functions #####
 
-def getDeltaZSimple(delta_Z, Z_current, max_current, max_delta):
+def getDeltaZSimple2(delta_Z, Z_current, max_current, max_delta):
     '''
     simply return delta_Z which is a list of random number in range [0, max_delta]
     '''
@@ -139,7 +139,7 @@ def getDeltaZSimple(delta_Z, Z_current, max_current, max_delta):
             delta_Z[i] = max_current - Z_current[i]
     return delta_Z
 
-def getOrderPriceSimple(Z_delta, r, p, orderPconstant):
+def getOrderPriceSimple2(Z_delta, r, p, orderPconstant):
     '''
     orderPconstant is a list of constants where each constant > 0 (to be initialized in the beginning)
     '''
@@ -164,7 +164,7 @@ def DoSimulation2(n, t, r, a, beta, price, var, alpha, eps_BC, X, A, actions, or
     # actions = np.zeros(n)  # current actions for each agent (discrete values of 1, -1 and 0 - Buy Sell Hold)
     # order_price_rational = np.zeros(n)  # prices of current order for each agent
     # Z_current_rational = np.random.randint(100, 500, n)
-
+    # print("X", X)
     # print("initial Z_current for rational agents:")
     # print(Z_current_rational)
     price_list_Rational = [price]
@@ -178,6 +178,7 @@ def DoSimulation2(n, t, r, a, beta, price, var, alpha, eps_BC, X, A, actions, or
     '''Irrational Network Initialization'''
     # max_current_Z = 500
     Z_current_irrational = [] # length of this list indicates the number of total irrational agents in the network
+    # print("Z_current_irrational", Z_current_irrational)
     Z_delta_irrational = []
     # max_Z_delta = 100
     # orderPconstant = 0.1
@@ -219,7 +220,7 @@ def DoSimulation2(n, t, r, a, beta, price, var, alpha, eps_BC, X, A, actions, or
 
 
         # Irrational agents Z_delta dynamics
-        Z_delta_irrational = getDeltaZSimple(Z_delta_irrational, Z_current_irrational, max_current_Z, max_Z_delta)
+        Z_delta_irrational = getDeltaZSimple2(Z_delta_irrational, Z_current_irrational, max_current_Z, max_Z_delta)
         trading_volume_irrational.append(sum(Z_delta_irrational))
         # print("this is the Z_delta for irrational agents")
         # print(Z_delta_irrational)
@@ -232,27 +233,27 @@ def DoSimulation2(n, t, r, a, beta, price, var, alpha, eps_BC, X, A, actions, or
         # print(Z_current_rational)
 
         # Rational agents Z_delta dynamics
-        Z_delta_rational = getDeltaZ(a, var, r, price, X)
+        Z_delta_rational = getDeltaZ2(a, var, r, price, X)
         # print("this is Z_delta for rational agents")
         # print(Z_delta_rational)
-        actions, trading_volume = getAction(Z_delta_rational, Z_current_rational, actions, n)
+        actions, trading_volume = getAction2(Z_delta_rational, Z_current_rational, actions, n)
         trading_volume_rational.append(trading_volume)
-        Z_current_rational = updateCurrentZ(Z_current_rational, Z_delta_rational, n)
+        Z_current_rational = updateCurrentZ2(Z_current_rational, Z_delta_rational, n)
         total_volume_rational.append(sum(Z_current_rational))
 
 
         # Price dynamics (takes into consideration both rational and irrational agents orders
-        order_price_rational = getOrderPrice(actions, beta, price, X, order_price_rational, n, r)
+        order_price_rational = getOrderPrice2(actions, beta, price, X, order_price_rational, n, r)
         # print("this is orderprice rational:")
         # print(order_price_rational)
-        order_price_irrational = getOrderPriceSimple(Z_delta_irrational, r, price, orderPconstant)
+        order_price_irrational = getOrderPriceSimple2(Z_delta_irrational, r, price, orderPconstant)
         # print("this is orderprice irrational:")
         # print(order_price_irrational)
-        price = updatePrice(Z_delta_rational, Z_delta_irrational, actions, order_price_rational, order_price_irrational, round)
+        price = updatePrice2(Z_delta_rational, Z_delta_irrational, actions, order_price_rational, order_price_irrational, round)
 
 
         # Rational agents Expected price dynamics
-        C = updateXwithBC(X, n, eps_BC)
+        C = updateXwithBC2(X, n, eps_BC)
         # C = updateXwithPA(X_prev, P, n, eps_PA)
         for i in range(n):
             for j in range(n):

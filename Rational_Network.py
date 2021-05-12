@@ -1,6 +1,10 @@
 import numpy as np
 import random
 
+'''
+Simulation Model 2
+'''
+
 def getDeltaZ(a, var, r, p, X):
     '''
     given the current price (p(t)) and current opinion (x(t), note x(t) is expected price for
@@ -123,16 +127,13 @@ def DoSimulation():
     t = 50 # number of rounds
     r = 0.0008588  # risk-free interest rate
     a = 1  # constant absolute risk aversion coefficient (CARA)
-    # beta = np.random.uniform(0, 10, n) # An array, risk preference when it comes to placing order
     beta = np.random.uniform(0, 0.2, n)
     price = 19.95 # initialize p(t=0) to be price
-    # var = 0.443208  # variance of stock in risk premium
-    var = 1.152757
+    var = 1.152757  # variance of stock in risk premium
     alpha = np.random.uniform(0, 0.8, n)  # alpha [0,1] is the update propensity parameter.
     eps_BC = np.random.uniform(0, 0.1, n)  # epsilon for BC model
     X = np.random.normal(19.95, 3, n)  # X is X(t=0) which is the expected price for t=1 (next period)
     A = np.identity(n) # initialize A(t=0) as an identity matrix
-    # A = np.ones(n)  # initialize A(t=0) as an matrix full of ones
 
 
     actions = np.zeros(n)  # current actions for each agent (discrete values of 1, -1 and 0 - Buy Sell Hold)
@@ -184,6 +185,7 @@ def DoSimulation():
     print("sum of Z_current:", sum(Z_current))
     print(price_list_BC[0], price_list_BC[-1])
 
+    print("Price Evolution; Opinion Mean; STD")
     print(price_list_BC)
     print(opinion_mean)
     print(std_BC)

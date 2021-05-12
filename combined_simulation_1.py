@@ -171,6 +171,7 @@ def DoSimulation1(n, t, r, a, beta, price, var, alpha, eps_BC, X, A, actions, or
     # order_price_rational = np.zeros(n)  # prices of current order for each agent
     # Z_current_rational = np.random.randint(100, 500, n)  # each agent holds between 10 to 1000 shares
 
+    # print("X", X)
     # print("initial Z_current for rational agents:")
     # print(Z_current_rational)
     price_list_Rational = [price]
