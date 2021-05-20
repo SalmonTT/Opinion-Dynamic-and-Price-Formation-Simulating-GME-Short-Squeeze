@@ -4,5 +4,13 @@ This is final year project for the Financial Technology program under the System
 We intend to make our codes and report public as a way to contribute to the spirit of open-source and offer what little guidance they may bring to other researchers who are
 studying the same topic. 
 
+Python environment: 3.7.8
+Packages: numpy
+
+To run the code:
+go to main_simulation.py and run it
+To change the parameters, go to DoSimulation()
+
+
 Feel free to contact us for questions. 
 
