@@ -9,7 +9,8 @@ Packages: numpy
 
 To run the code:
 go to main_simulation.py and run it
-To change the parameters, go to DoSimulation()
+To change the parameters, go to initialization()
+To edit specific model behaviors, go to the corresponding .py files (e.g. combined_simulation_1.py) where you can find the specific mechanisms.
 
 
 Feel free to contact us for questions. 
